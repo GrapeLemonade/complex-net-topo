@@ -4,6 +4,8 @@ import zipfile
 
 for dirpath, dirnames, filenames in os.walk(os.curdir):
     for dir in dirnames:
+        if dir.startswith('.'):
+            continue
         dd = os.path.join(os.curdir, dir)
         for dps, dns, fns in os.walk(dd):
             for fn in fns:
@@ -27,10 +29,13 @@ for dirpath, dirnames, filenames in os.walk(os.curdir):
                         # zipfile.
                         # with open('qwq.zip', 'wb') as ff:
                         #     ff.write(flash[st:ed])
-                        with zipfile.ZipFile(zip_bytes, 'r') as zip_ref:
-                            with open(os.path.join(dd, 'vrpcfg.cfg'), 'wb') as ff:
-                                ff.write(zip_ref.read('vrpcfg.cfg'))
-                            print(f'Extracted {file_path}')
+                        try:
+                            with zipfile.ZipFile(zip_bytes, 'r') as zip_ref:
+                                with open(os.path.join(dd, 'vrpcfg.cfg'), 'wb') as ff:
+                                    ff.write(zip_ref.read('vrpcfg.cfg'))
+                                print(f'Extracted {file_path}')
+                        except zipfile.BadZipFile as e:
+                            print(f'{e}: {file_path}')
                 else:
                     print(f'Unrecongnized file {file_path}')
         # if filename.endswith('.zip'):
