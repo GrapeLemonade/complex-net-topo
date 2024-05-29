@@ -22,20 +22,27 @@ for dirpath, dirnames, filenames in os.walk(os.curdir):
                     end_signature = b'\x50\x4B\x05\x06'
                     with open(file_path, 'rb') as f:
                         flash = f.read(2 ** 20)
-                        st = flash.find(start_signature)
-                        ed = flash.find(end_signature, st) + 22
-                        # print(flash[st:ed])
-                        zip_bytes = io.BytesIO(flash[st:ed])
-                        # zipfile.
-                        # with open('qwq.zip', 'wb') as ff:
-                        #     ff.write(flash[st:ed])
-                        try:
-                            with zipfile.ZipFile(zip_bytes, 'r') as zip_ref:
-                                with open(os.path.join(dd, 'vrpcfg.cfg'), 'wb') as ff:
-                                    ff.write(zip_ref.read('vrpcfg.cfg'))
-                                print(f'Extracted {file_path}')
-                        except zipfile.BadZipFile as e:
-                            print(f'{e}: {file_path}')
+                        pos = 0
+                        while True:
+                            st = flash.find(start_signature, pos)
+                            ed = flash.find(end_signature, st) + 22
+                            if st < 0 or ed < 0:
+                                break
+                            pos = ed
+                            # print(flash[st:ed])
+                            zip_bytes = io.BytesIO(flash[st:ed])
+                            # zipfile.
+                            # with open('qwq.zip', 'wb') as ff:
+                            #     ff.write(flash[st:ed])
+                            try:
+                                with zipfile.ZipFile(zip_bytes, 'r') as zip_ref:
+                                    with open(os.path.join(dd, 'vrpcfg.cfg'), 'wb') as ff:
+                                        ff.write(zip_ref.read('vrpcfg.cfg'))
+                                    print(f'Extracted {file_path}')
+                            except zipfile.BadZipFile as e:
+                                print(f'{e}: {file_path}')
+                            except KeyError as e:
+                                print(f'{e}: {file_path} = {zip_ref.filelist}')
                 else:
                     print(f'Unrecongnized file {file_path}')
         # if filename.endswith('.zip'):
